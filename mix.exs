@@ -27,9 +27,9 @@ defmodule Khafra.MixProject do
       {:distillery, "~> 2.0"},
       {:quantum, "~> 2.3"},
       {:timex, "~> 3.0"},
-      {:simplestatex, "~> 0.1.5"},
-      {:giza_sphinxsearch, path: "../giza_sphinxsearch"}
-      #{:giza_sphinxsearch, "~> 1.0"}
+      {:simplestatex, "~> 0.1.5"}
+      #{:giza_sphinxsearch, path: "../giza_sphinxsearch"}
+      #{:giza_sphinxsearch, "~> 1.0.5"}
     ]
   end
 
