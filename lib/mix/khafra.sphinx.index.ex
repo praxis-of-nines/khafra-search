@@ -3,6 +3,8 @@ defmodule Mix.Tasks.Khafra.Sphinx.Index do
 
   @shortdoc "Shortcut to run the Sphinx Indexer"
 
+  alias Khafra.Job.IndexOpts
+
   @moduledoc """
   Mix shortcut to running the Sphinx Indexer to build an index against the data source.
 
@@ -15,61 +17,19 @@ defmodule Mix.Tasks.Khafra.Sphinx.Index do
 
   ## Example
       # Rotates all indices
-      > mix khafra.sphinx.index rotate
+      > mix khafra.sphinx.index rotate all
 
       # Rotates the listed indices
       > mix khafra.sphinx.index rotate blog_posts blog_authors
 
-      > mix khafra.sphinx.index only blog_posts
+      > mix khafra.sphinx.index blog_posts
     
       # Windows machines must run their own version of the command
-      > mix khafra.win.sphinx.index rotate
+      > mix khafra.win.sphinx.index rotate all
   """
+  def run(opts) do
+    result = IndexOpts.run(opts)
 
-  def run([]), do: run_command(["-c", "../../sphinx.conf", "--all"])
-
-  def run(["rotate"|options]) do
-    indices = case options do
-      [] ->
-        ["--all"]
-      _ ->
-        options
-    end
-
-    run_command(["-c", "../../sphinx.conf", "--rotate"|indices])
-  end
-
-  def run(["only"|indices]) do
-    run_command(["-c", "../../sphinx.conf"] ++ indices)
-  end
-
-  def run(["windows"]), do: run_command("indexer.exe", ["-c", "../../sphinx.conf", "--all"])
-
-  def run(["windows", "rotate"|options]) do
-    indices = case options do
-      [] ->
-        ["--all"]
-      _ ->
-        options
-    end
-
-    run_command("indexer.exe", ["-c", "../../sphinx/sphinx.conf", "--rotate"|indices])
-  end
-
-  def run(["windows"|indices]), do: run_command("indexer.exe", ["-c", "../../sphinx.conf"] ++ indices)
-
-
-  defp run_command(options), do: run_command("indexer", options)
-
-  defp run_command(exe_file_name, options) do
-    _ = File.mkdir("sphinx/data")
-
-    {result, _} = System.cwd()
-    |> Path.join("sphinx/install/bin/./" <> exe_file_name)
-    |> System.cmd(options, cd: "sphinx/install/bin")
-
-    Mix.shell.info result
-
-    Mix.shell.info "Indexing complete"
+    Khafra.output_stream_command_result(result)
   end
 end

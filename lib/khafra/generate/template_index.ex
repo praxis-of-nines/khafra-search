@@ -34,7 +34,8 @@ defmodule Khafra.Generate.TemplateIndex do
   end
 
   def get([], %{:name => name, :args => args, :index_source => source} = map) do
-    path = "path = ../../data/#{name}"
+    path = File.cwd!() |> Path.join("sphinx/data/#{name}")
+    path = "path = #{path}"
 
     name_upper = String.upcase(Atom.to_string(name))
     

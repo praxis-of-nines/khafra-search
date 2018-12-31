@@ -24,7 +24,7 @@ defmodule Mix.Tasks.Khafra.Sphinx.Download do
 
     Mix.shell.info "Downloading Sphinx (May take a while)"
 
-    _ = Tasks.download_sphinx(version)
+    _result = Tasks.download_sphinx(version)
 
     Mix.shell.info "Sphinx download and unpack complete"
   end

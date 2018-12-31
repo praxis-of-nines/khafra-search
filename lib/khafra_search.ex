@@ -18,4 +18,13 @@ defmodule Khafra do
   def stat_index_rotate() do
     SSX.query("indexer", :daily) |> SSX.memory() |> SSX.get()
   end
+
+  @doc """
+  Dump the output of a command line result
+  """
+  def output_stream_command_result({result, _}) do
+    Enum.each(String.split(result, "\n"), fn result_line ->
+      IO.inspect result_line
+    end)
+  end
 end

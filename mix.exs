@@ -4,11 +4,13 @@ defmodule Khafra.MixProject do
   def project do
     [
       app: :khafra_search,
-      version: "0.1.0",
+      version: "0.1.1",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      description: description(),
+      package: package()
     ]
   end
 
@@ -37,6 +39,20 @@ defmodule Khafra.MixProject do
     [
       "khafra.win.sphinx.searchd": ["khafra.sphinx.searchd windows"],
       "khafra.win.sphinx.index": ["khafra.sphinx.index windows"]
+    ]
+  end
+
+  defp description() do
+    "A search deployment helper library. Aims to bring distributed Sphinx up to the ease of deployment and use of elastic search."
+  end
+
+  defp package() do
+    [
+      licenses: ["MIT"],
+      maintainers: ["Tyler Pierce"],
+      files: ["lib", "mix.exs", "README.md", "test", "config", "priv"],
+      links: %{"GitHub" => "https://github.com/praxis-of-nines/khafra-search"},
+      source_url: "https://github.com/praxis-of-nines/khafra-search"
     ]
   end
 end

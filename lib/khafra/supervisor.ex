@@ -6,6 +6,8 @@ defmodule Khafra.Supervisor do
   end
 
   def init(:ok) do
+    _ = Application.ensure_all_started(:timex)
+    
     children = [
       worker(Khafra.Scheduler, []),
       supervisor(SimpleStatEx.StatSupervisor, [])
