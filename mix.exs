@@ -50,7 +50,7 @@ defmodule Khafra.MixProject do
     [
       licenses: ["MIT"],
       maintainers: ["Tyler Pierce"],
-      files: ["lib", "mix.exs", "README.md", "test", "config", "priv"],
+      files: ["lib", "mix.exs", "README.md", "test", "config"],
       links: %{"GitHub" => "https://github.com/praxis-of-nines/khafra-search"},
       source_url: "https://github.com/praxis-of-nines/khafra-search"
     ]
