@@ -11,7 +11,7 @@ defmodule Khafra.ReleaseTasks do
   @doc """
   Download Sphinx and unpack it
   """
-  def download_sphinx(), do: download_sphinx([])
+  def download_sphinx(), do: download_sphinx(["linux_64"])
   def download_sphinx([version]) do
     IO.puts "Downloading Sphinx (May take a while)"
 
