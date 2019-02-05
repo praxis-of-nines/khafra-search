@@ -9,7 +9,7 @@ Khafra allows you to easily deploy and maintain a search cluster similar to elas
 - You want to monitor sphinx from an Elixir or Phoenix project
 - New to search indexing and want to learn!
 
-Khafra is a dependency that can be added to any Elixir project and uses Quantum to handle job execution schedules (for non-real time indexing use cases).
+Khafra is a dependency that can be added to any Elixir project or Phoenix Framework and uses Quantum to handle job execution schedules (for non-real time indexing use cases).
 
 To query your running sphinx environment you can use the [Giza Sphinx Client for Elixir](https://hex.pm/packages/giza_sphinxsearch)
 
