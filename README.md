@@ -1,4 +1,4 @@
-# Khafra
+# Khafra Search
 
 Khafra allows you to easily deploy and maintain a search cluster similar to elastic search. You will want to use khafra if:
 
