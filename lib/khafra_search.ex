@@ -24,7 +24,7 @@ defmodule Khafra do
   """
   def output_stream_command_result({result, _}) do
     Enum.each(String.split(result, "\n"), fn result_line ->
-      IO.inspect result_line
+      IO.puts result_line
     end)
   end
 end

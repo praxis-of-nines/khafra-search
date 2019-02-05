@@ -4,7 +4,7 @@ defmodule Khafra.MixProject do
   def project do
     [
       app: :khafra_search,
-      version: "0.1.2",
+      version: "0.1.3",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -30,8 +30,6 @@ defmodule Khafra.MixProject do
       {:quantum, "~> 2.3"},
       {:timex, "~> 3.0"},
       {:simplestatex, "~> 0.1.5"}
-      #{:giza_sphinxsearch, path: "../giza_sphinxsearch"}
-      #{:giza_sphinxsearch, "~> 1.0.5"}
     ]
   end
 

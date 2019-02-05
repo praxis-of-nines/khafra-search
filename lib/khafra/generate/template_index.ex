@@ -27,7 +27,11 @@ defmodule Khafra.Generate.TemplateIndex do
     get(args, non_unique_arg(Map.put(map, :index_source, source), :args, :source, source_name))
   end
 
-  def get([{key, arg}|args], map), do: get(args, non_unique_arg(map, :args, key, arg))
+  def get([{key, arg}|args], map) do 
+    arg = String.replace(arg, "[cwd!]", System.cwd())
+
+    get(args, non_unique_arg(map, :args, key, arg))
+  end
 
   def get([], %{:args => arg_list} = map) when is_list(arg_list) do
     get([], Map.replace!(map, :args, combine_non_unique_args(arg_list)))

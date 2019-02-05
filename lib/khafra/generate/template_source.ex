@@ -32,7 +32,11 @@ defmodule Khafra.Generate.TemplateSource do
     get(args, non_unique_arg(map, :args, :sql_query, arg))
   end
 
-  def get([{key, arg}|args], map) when is_atom(arg) or is_binary(arg), do: get(args, non_unique_arg(map, :args, key, arg))
+  def get([{key, arg}|args], map) when is_atom(arg) or is_binary(arg) do
+    arg = String.replace(arg, "[cwd!]", System.cwd())
+    
+    get(args, non_unique_arg(map, :args, key, arg))
+ end
 
   def get([], %{:args => arg_list} = map) when is_list(arg_list) do
     get([], Map.replace!(map, :args, combine_non_unique_args(arg_list)))
