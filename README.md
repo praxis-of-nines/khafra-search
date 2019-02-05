@@ -121,6 +121,10 @@ config :khafra_search, :index_defaults,
 > mix khafra.sphinx.index rotate all
 ```
 
+## Deployment Example
+
+Coming soon
+
 
 ## Needed features:
 
