@@ -29,6 +29,9 @@ defmodule Khafra.Init.Tasks do
 
   def download_sphinx(version_type, version) do
     _ = File.mkdir("sphinx/install")
+    # Create the recommended data/logging dirs
+    _ = File.mkdir("sphinx/data")
+    _ = File.mkdir("sphinx/log")
 
     download = download(version)
 
