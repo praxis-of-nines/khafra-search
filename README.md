@@ -22,6 +22,20 @@ def deps do
     {:khafra_search, "~> 0.1"}
   ]
 end
+
+# Add to your application or supervisor
+def start(_type, _args) do
+    import Supervisor.Spec
+
+    # List all child processes to be supervised
+    children = [
+      ...,
+      supervisor(Khafra.Supervisor, [])
+    ]
+
+    opts = [strategy: :one_for_one, name: YourApp.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
 ```
 
 
