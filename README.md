@@ -1,15 +1,15 @@
 # Khafra Search
 
-Khafra allows you to easily deploy and maintain a search cluster similar to elastic search. You will want to use khafra if:
+Khafra allows you to easily deploy and run Manticore or Sphinx as an Elixir deployment. The idea is eventually to create a managed cluster similar to ElasticSearch. You will want to use khafra if:
 
-- You want to keep your deployments and tooling Elixir based and not learn how to maintain Sphinx
+- You want to keep your deployments and tooling Elixir based and not learn how to maintain Sphinx or Manticore
 - You test and reindex your project often in development and wish to speed up your development cycle
 - You find it messy to keep track of all the configuration files for projects over and over
 - You wish to deploy Sphinx without configuring CRON jobs on the server
 - You want to monitor sphinx from an Elixir or Phoenix project
-- New to search indexing and want to learn!
+- New to search indexing and want to learn
 
-Khafra is a dependency that can be added to any Elixir project or Phoenix Framework and uses Quantum to handle job execution schedules (for non-real time indexing use cases).
+Khafra is a dependency that can be added to any Elixir project and uses Quantum to handle job execution schedules (for non-real time indexing use cases).
 
 To query your running sphinx environment you can use the [Giza Sphinx Client for Elixir](https://hex.pm/packages/giza_sphinxsearch)
 
@@ -140,7 +140,7 @@ config :khafra_search, :index_defaults,
 Coming soon
 
 
-## Needed features:
+## Development Direction (potential features upcoming):
 
 - Generators for some of the deployment tasks that are useful. For example when using distillery you probably want to set these commands up:
 
@@ -184,3 +184,7 @@ end
 - Testing and helpers to maintain a real time sphinx index
 
 - Mix tasks to generate configuration with sensible defaults (possibly directly from postgres/mysql table data?)
+
+- Monitoring tools and optional UI
+
+- Heartbeat and monitoring logic
