@@ -16,7 +16,9 @@ defmodule Khafra do
   Get a stat dump of how many times the index rotation job has been run
   """
   def stat_index_rotate() do
-    SSX.query("indexer", :daily) |> SSX.memory() |> SSX.get()
+    SSX.query("indexer", :daily) 
+    |> SSX.memory() 
+    |> SSX.get()
   end
 
   @doc """

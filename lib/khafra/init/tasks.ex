@@ -4,10 +4,9 @@ defmodule Khafra.Init.Tasks do
   """
   alias Khafra.Generate.GenerateFromConfig, as: Gen
 
-  @linux_64_version "sphinx-3.1.1-612d99f-linux-amd64"
+  @linux_64_version "manticore-3.5.4-201211-13f8d08-release-source"
   @windows_64_version "sphinx-3.1.1-612d99f-windows-amd64.zip"
   @mac_os_version "sphinx-3.1.1-612d99f-darwin-amd64"
-
 
   def all(version, os \\ :linux) do
     gen_all = generate_config()
@@ -69,7 +68,7 @@ defmodule Khafra.Init.Tasks do
 
     System.cmd(
       "wget", 
-      ["-q", "http://sphinxsearch.com/files/#{version}.tar.gz", "-P", "sphinx/install/"])
+      ["-q", "https://repo.manticoresearch.com/repository/manticoresearch_source/release/#{version}.tar.gz", "-P", "sphinx/install/"])
   end
 
   defp remove() do
