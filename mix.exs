@@ -27,7 +27,7 @@ defmodule Khafra.MixProject do
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:edeliver, ">= 1.6.0"},
       {:distillery, "~> 2.0"},
-      {:quantum, "~> 2.3"},
+      {:quantum, "~> 3.3"},
       {:timex, "~> 3.0"},
       {:simplestatex, "~> 0.2"}
     ]
