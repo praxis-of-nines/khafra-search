@@ -5,7 +5,7 @@ defmodule Khafra.MixProject do
     [
       app: :khafra_search,
       version: "0.2.0",
-      elixir: "~> 1.7",
+      elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
@@ -27,7 +27,7 @@ defmodule Khafra.MixProject do
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:edeliver, ">= 1.6.0"},
       {:distillery, "~> 2.0"},
-      {:quantum, "~> 3.3"},
+      {:quantum, "~> 2.4"},
       {:timex, "~> 3.0"},
       {:simplestatex, "~> 0.2"}
     ]

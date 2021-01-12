@@ -18,16 +18,11 @@ defmodule Khafra.Job.Index do
     run([option|command_opts], system, opts)
   end
 
-  def run(command_opts, _, [{:system, "windows"}|opts]) do
-    run(command_opts, "windows", opts)
-  end
-
-  def run(command_opts, "windows", []), do: run_command("indexer.exe", command_opts)
   def run(command_opts, _, []), do: run_command("indexer", command_opts)
 
   defp run_command(exe_name, options) do
     System.cwd()
-    |> Path.join("/sphinx/install/bin/./" <> exe_name)
+    |> Path.join("/sphinx/install/usr/bin/./" <> exe_name)
     |> System.cmd(options)
   end
 end

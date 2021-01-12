@@ -7,10 +7,6 @@ defmodule Khafra.Job.IndexOpts do
 
   def run(cmd_opts), do: run(cmd_opts, [], [])
 
-  def run(["windows"|cmd_opts], indices, opts) do
-    run(cmd_opts, indices, [{:system, "windows"}|opts])  
-  end
-
   def run(["all"|cmd_opts], indices, opts) do
     run(cmd_opts, indices, [{:option, "--all"}|opts])
   end

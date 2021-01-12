@@ -17,8 +17,8 @@ defmodule Khafra do
   """
   def stat_index_rotate() do
     SSX.query("indexer", :daily) 
-    |> SSX.memory() 
-    |> SSX.get()
+    #|> SSX.memory() 
+    #|> SSX.get()
   end
 
   @doc """

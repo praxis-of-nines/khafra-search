@@ -19,10 +19,10 @@ config :khafra_search, :searchd,
   listen_sphinx: "9312",
   listen_mysql: "9306:mysql41",
   listen_http: "9308",
-  log: "../../log/searchd.log",
-  query_log: "../../log/query.log",
+  log: "../../../log/searchd.log",
+  query_log: "../../../log/query.log",
   pid_file: "../../data/searchd.pid",
-  read_timeout: "2"
+  network_timeout: "2"
 
 # Common index defaults: by default the parent of any index created
 config :khafra_search, :index_defaults,
