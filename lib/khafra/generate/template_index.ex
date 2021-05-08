@@ -5,6 +5,12 @@ defmodule Khafra.Generate.TemplateIndex do
 
 
   def get(args), do: get(args, %{})
+
+  def get([{:type, :distributed}|args], map), do: get(args, Map.put(map, :type, "distributed"))
+
+  def get([{:local, locals}|args], map), do: get(args, Map.put(map, :local, locals))
+
+  def get([{:remote, locals}|args], map), do: get(args, Map.put(map, :remote, locals))
   
   def get([{:name, name}|args], map), do: get(args, Map.put(map, :name, name))
 
@@ -37,6 +43,25 @@ defmodule Khafra.Generate.TemplateIndex do
     get([], Map.replace!(map, :args, combine_non_unique_args(arg_list)))
   end
 
+  def get([], %{:type => "distributed", :name => name} = map) do
+    name = Atom.to_string(name)
+    name_upper = String.upcase(name)
+
+    local_indexes = Enum.map(Map.get(map, :local, []), fn local -> "local = #{Atom.to_string(local)}\n  " end)
+    remote_indexes = Enum.map(Map.get(map, :remote, []), fn remote -> "remote = #{Atom.to_string(remote)}\n  " end)
+
+    ~s"""
+    ## #{name_upper}
+    ####################################################
+    index #{name}
+    {
+      type = distributed
+      #{local_indexes}
+      #{remote_indexes}
+    }
+    """
+  end
+
   def get([], %{:name => name, :args => args, :index_source => source} = map) do
     path = File.cwd!() |> Path.join("sphinx/data/#{name}")
     path = "path = #{path}"
@@ -45,7 +70,7 @@ defmodule Khafra.Generate.TemplateIndex do
     
     index_name = case map do
       %{index_name: index_name} -> index_name
-      _ -> name
+      _ -> Atom.to_string(name)
     end
 
     ~s"""

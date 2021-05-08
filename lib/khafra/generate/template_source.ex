@@ -60,6 +60,10 @@ defmodule Khafra.Generate.TemplateSource do
     """
   end
 
+  def get([], %{:attributes => _, :fields => _}) do
+    {:warning, "No source name set. Check source configs"}
+  end
+
   def get([], map) do
     get([], optional_args(map, [:attributes, :fields], ["## No Attributes", "## No Fields"]))
   end
