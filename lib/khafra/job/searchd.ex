@@ -9,7 +9,7 @@ defmodule Khafra.Job.Searchd do
     _ = File.mkdir("sphinx/data")
     _ = File.mkdir("sphinx/log")
 
-    System.cwd()
+    File.cwd()
     |> Path.join("sphinx/install/usr/bin/./" <> exe_file_name)
     |> System.cmd(params, cd: "sphinx/install/usr/bin")
   end

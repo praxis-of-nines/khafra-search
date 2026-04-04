@@ -33,7 +33,7 @@ defmodule Khafra.Generate.TemplateSource do
   end
 
   def get([{key, arg}|args], map) when is_atom(arg) or is_binary(arg) do
-    arg = String.replace(arg, "[cwd!]", System.cwd())
+    arg = String.replace(arg, "[cwd!]", File.cwd())
     
     get(args, non_unique_arg(map, :args, key, arg))
  end

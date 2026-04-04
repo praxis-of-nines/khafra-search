@@ -1,17 +1,30 @@
 defmodule Khafra.Application do
-  use Supervisor
+  @moduledoc false
+
+  use Application
+
+  @env Application.compile_env(:khafra_search, :env)
 
   def start_link() do
     Supervisor.start_link(__MODULE__, [], [])
   end
 
-  def init(_opts) do
-    _ = Application.ensure_all_started(:timex)
-    
+  def start(_type, _args) do
     children = [
-      Khafra.Scheduler
+      Khafra.Scheduler,
+      Lapin.Supervisor,
+      Khafra.Table.BatchSupervisor
+      | env_deps(@env)
     ]
 
-    Supervisor.init(children, strategy: :one_for_one)
+    Supervisor.start_link(children, strategy: :one_for_one, name: Khafra.Supervisor)
   end
+
+  defp env_deps(:dev) do
+    [
+      Khafra.Sample.Repo
+    ]
+  end
+
+  defp env_deps(_), do: []
 end

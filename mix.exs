@@ -14,34 +14,34 @@ defmodule Khafra.MixProject do
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger], mod: {Khafra.Application, []}
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
-      {:edeliver, ">= 1.6.0"},
-      {:distillery, "~> 2.0"},
-      {:quantum, "~> 2.4"},
-      {:timex, "~> 3.0"},
-      {:simplestatex, "~> 0.2"}
+      {:quantum, "~> 3.0"},
+      {:giza_sphinxsearch, "~> 2.0"},
+      {:lapin, "~> 2.0.0"},
+      # Used for testing
+      {:ecto, "~> 3.13", only: :dev},
+      {:ecto_sql, "~> 3.12", only: :dev},
+      {:postgrex, "~> 0.22", only: :dev}
     ]
   end
 
   defp aliases do
-    [
-      "khafra.win.sphinx.searchd": ["khafra.sphinx.searchd windows"],
-      "khafra.win.sphinx.index": ["khafra.sphinx.index windows"]
-    ]
+    []
   end
 
   defp description() do
-    "A search deployment helper library. Aims to bring distributed Sphinx up to the ease of deployment and use of elastic search."
+    """
+    A search deployment helper library. Aims to easy deployment and monitoring of 
+    distributed Manticore & Sphinx in a Linux environment
+    """
   end
 
   defp package() do

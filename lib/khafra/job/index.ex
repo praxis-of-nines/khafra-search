@@ -1,6 +1,6 @@
 defmodule Khafra.Job.Index do
   def run(opts) do
-    conf_path = System.cwd()
+    conf_path = File.cwd()
     |> Path.join("sphinx/sphinx.conf")
 
     run(["-c", conf_path], "linux", opts)
@@ -21,7 +21,7 @@ defmodule Khafra.Job.Index do
   def run(command_opts, _, []), do: run_command("indexer", command_opts)
 
   defp run_command(exe_name, options) do
-    System.cwd()
+    File.cwd()
     |> Path.join("/sphinx/install/usr/bin/./" <> exe_name)
     |> System.cmd(options)
   end
