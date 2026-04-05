@@ -8,7 +8,8 @@ config :khafra_search,
 # Strategy for updating after a schema insert/update
 config :khafra_search, :strategies,
   update_strategy: :immediate,
-  update_all_strategy: :queue
+  update_all_strategy: :queue,
+  application_start: :create_tables_if_not_exist
 
 # Cluster+Shard settings. Agents should map to deployed servers.
 # This config will be used in created tables by default but can

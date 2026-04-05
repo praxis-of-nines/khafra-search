@@ -1,4 +1,4 @@
-defmodule Khafra.Table.BatchServer do
+defmodule Khafra.SearchTable.BatchServer do
   @moduledoc """
   GenServer for processing batch operations with rate limiting.
 

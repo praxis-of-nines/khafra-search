@@ -1,4 +1,4 @@
-defmodule Khafra.Table.BatchSupervisor do
+defmodule Khafra.SearchTable.BatchSupervisor do
   @moduledoc """
   Dynamic supervisor for rate-limited batch operations
   """
@@ -19,7 +19,7 @@ defmodule Khafra.Table.BatchSupervisor do
   def start_batch(query, op, limit, minutes_between_jobs) do
     DynamicSupervisor.start_child(
       __MODULE__,
-      {Khafra.Table.BatchServer, {query, op, limit, minutes_between_jobs}}
+      {Khafra.SearchTable.BatchServer, {query, op, limit, minutes_between_jobs}}
     )
   end
 end

@@ -4,28 +4,29 @@ defmodule Khafra.Sample do
   how one might integrate khafra smoothly with their app
   """
   alias Giza.ManticoreQL
-  alias Khafra.Sample.Repo
   alias Khafra.Sample.TestSchema
 
+  @repo Application.compile_env(:khafra_search, :repo)
+
   @doc "Add city"
-  def add_city(%{} = attrs) do
+  def add_city(%{} = attrs, opts) do
     %TestSchema{}
     |> TestSchema.changeset(attrs)
-    |> Repo.insert()
-    |> Khafra.insert()
+    |> @repo.insert()
+    |> Khafra.insert(opts)
   end
 
   @doc "Update city"
-  def update_city(city, %{} = attrs) do
+  def update_city(city, %{} = attrs, opts) do
     city
     |> TestSchema.changeset(attrs)
-    |> Repo.update()
-    |> Khafra.update()
+    |> @repo.update()
+    |> Khafra.update(opts)
   end
 
   @doc "Retrieve a city"
   def get_city(id) do
-    Repo.get_by(TestSchema, id: id)
+    @repo.get_by(TestSchema, id: id)
   end
 
   @doc "Find cities from search tables"

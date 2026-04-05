@@ -8,6 +8,9 @@ defmodule Khafra.Queue.ManageTableConsumer do
       {:record_op, record, operation} ->
         operation.(record)
 
+      {:record_op, operation} ->
+        operation.()
+
       other ->
         Logger.debug(fn -> "Unhandled message: #{inspect(other)}" end)
     end

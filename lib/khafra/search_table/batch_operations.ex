@@ -1,8 +1,12 @@
-defmodule Khafra.Table.BatchOperations do
+defmodule Khafra.SearchTable.BatchOperations do
   @moduledoc """
   Batch wrapper for table operations
   """
   alias Khafra.Queue.ManageTableProducer
+  alias Khafra.SearchTable.BatchSupervisor
+
+  @exchange "table_manager_exchange"
+  @exchange_key "manage_tables_key"
 
   @doc """
   Run a batch of the provided operation using provided strategy.
@@ -33,8 +37,8 @@ defmodule Khafra.Table.BatchOperations do
       |> repo.stream()
       |> Enum.each(fn record ->
            ManageTableProducer.publish(
-             "table_manager_exchange",
-             "manage_tables_key",
+             @exchange,
+             @exchange_key,
              :erlang.term_to_binary({:record_op, record, op})
            )
          end)
@@ -42,6 +46,6 @@ defmodule Khafra.Table.BatchOperations do
   end
 
   def batch_update(query, op, {:rate_limited_producer, limit, minutes_between_jobs}) do
-    Khafra.Table.BatchSupervisor.start_batch(query, op, limit, minutes_between_jobs)
+    BatchSupervisor.start_batch(query, op, limit, minutes_between_jobs)
   end
 end

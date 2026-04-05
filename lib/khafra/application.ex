@@ -3,8 +3,6 @@ defmodule Khafra.Application do
 
   use Application
 
-  @env Application.compile_env(:khafra_search, :env)
-
   def start_link() do
     Supervisor.start_link(__MODULE__, [], [])
   end
@@ -13,18 +11,13 @@ defmodule Khafra.Application do
     children = [
       Khafra.Scheduler,
       Lapin.Supervisor,
-      Khafra.Table.BatchSupervisor
-      | env_deps(@env)
+      Khafra.SearchTable.BatchSupervisor
+      | optional_deps(Application.get_env(:khafra_search, :repo))
     ]
 
     Supervisor.start_link(children, strategy: :one_for_one, name: Khafra.Supervisor)
   end
 
-  defp env_deps(:dev) do
-    [
-      Khafra.Sample.Repo
-    ]
-  end
-
-  defp env_deps(_), do: []
+  defp optional_deps(nil), do: []
+  defp optional_deps(repo), do: [repo]
 end
