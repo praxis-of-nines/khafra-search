@@ -8,10 +8,14 @@ defmodule Khafra.Application do
   end
 
   def start(_type, _args) do
+    :syn.add_node_to_scopes([:search_tables])
+
     children = [
       Khafra.Scheduler,
       Lapin.Supervisor,
-      Khafra.SearchTable.BatchSupervisor
+      Khafra.SearchTable.BatchSupervisor,
+      Khafra.SearchTable.TableSupervisor,
+      Khafra.SearchTable.TableObserver
       | optional_deps(Application.get_env(:khafra_search, :repo))
     ]
 

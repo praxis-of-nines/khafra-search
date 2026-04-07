@@ -36,7 +36,15 @@ defmodule Khafra.SearchTable.Operations do
   end
 
   @doc """
-  Create table
+  Create table.
+
+  ## Real Time (rt)
+
+
+
+  ## Distributed
+
+
   """
   def create(schema, :distributed, opts) do
     agents = opts
@@ -48,7 +56,16 @@ defmodule Khafra.SearchTable.Operations do
              
     schema
     |> Serialize.table_name()
-    |> Giza.create_distributed_table(agents, opts)
+    |> SearchTables.create_distributed_table(agents, opts)
+  end
+
+  def create(schema, :rt, opts) do
+    schema
+    |> Serialize.table_name()
+    |> SearchTables.create_table_if_not_exists(
+         Serialize.search_table_schema(schema),
+         [{:type, :rt} | opts]
+       )
   end
 
   # PRIVATE FUNCTIONS

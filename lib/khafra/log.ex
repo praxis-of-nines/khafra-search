@@ -13,4 +13,9 @@ defmodule Khafra.Log do
   def batch_operation(result) do
     IO.inspect(result)
   end
+
+  @doc "Log a create table request"
+  def create_table(result) do
+    IO.inspect(result)
+  end
 end

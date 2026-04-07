@@ -2,13 +2,7 @@ defmodule Khafra.SearchTable do
   @moduledoc """
   Search Table methods
   """
-  alias Giza.SearchTables
   alias Khafra.SearchTable.{BatchOperations, Operations}
-  alias Khafra.Queue.ManageTableProducer
-  alias Khafra.Serialize
-
-  @exchange "table_manager_exchange"
-  @exchange_key "manage_tables_key"
 
   @doc """
   Insert or update a table row
@@ -29,17 +23,17 @@ defmodule Khafra.SearchTable do
   end
 
   @doc """
-  Create a table modifying by provided opts. By default creates a distributed
-  table using configured agents.
+  Create a table modifying by provided opts.
   """
-  def create(query, opts \\ [])
+  def create(schema, opts \\ [])
 
-  def create(query, opts) do
+  def create(schema, opts) do
     # merge opts with default create opts
     {table_type, opts} = default_create_opts()
                          |> Keyword.merge(opts)
                          |> Keyword.pop!(:type)
 
+    
     Operations.create(schema, table_type, opts)
   end
 
@@ -47,7 +41,8 @@ defmodule Khafra.SearchTable do
   ###################
   defp default_create_opts do
     [
-      {type: :distributed}
+      {:type, :rt},
+      {:fuzzy_match, true}
     ]
   end
 end

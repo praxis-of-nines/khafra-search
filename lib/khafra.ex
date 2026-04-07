@@ -4,7 +4,6 @@ defmodule Khafra do
   """
   alias Khafra.Log
   alias Khafra.SearchTable
-  alias Khafra.SearchTable.BatchOperations
 
   @doc """
   Insert, creating table if it does not exist yet
@@ -30,8 +29,10 @@ defmodule Khafra do
   @doc """
   Create a table using configured strategy and options
   """
-  def create_table(_schema, _opts) do
-    #Giza.create_
+  def create_table(schema, opts \\ []) do
+    schema
+    |> SearchTable.create(opts)
+    |> Log.create_table()
   end
 
   # PRIVATE FUNCTIONS

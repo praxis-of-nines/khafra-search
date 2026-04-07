@@ -1,0 +1,52 @@
+defmodule Khafra.SearchTable.TableSupervisor do
+  @moduledoc """
+  DynamicSupervisor that starts a TableServer for each manticore
+  real-time table derived from modules implementing SearchBehaviour.
+  """
+  use DynamicSupervisor
+
+  def start_link(init_arg) do
+    {:ok, pid} = DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
+    start_table_servers()
+    {:ok, pid}
+  end
+
+  @impl true
+  def init(_init_arg) do
+    DynamicSupervisor.init(strategy: :one_for_one)
+  end
+
+  @doc """
+  Called after the supervisor is started to spin up a TableServer
+  for every schema that implements SearchBehaviour.
+  """
+  def start_table_servers do
+    search_schemas()
+    |> Enum.each(fn schema ->
+      DynamicSupervisor.start_child(
+        __MODULE__,
+        {Khafra.SearchTable.TableServer, schema}
+      )
+    end)
+  end
+
+  @doc """
+  Return all loaded modules that implement Khafra.SearchBehaviour.
+  """
+  def search_schemas do
+    :code.all_loaded()
+    |> Enum.map(fn {module, _} -> module end)
+    |> Enum.filter(&implements_search_behaviour?/1)
+  end
+
+  # PRIVATE FUNCTIONS
+  ###################
+  defp implements_search_behaviour?(module) do
+    module.module_info(:attributes)
+    |> Keyword.get_values(:behaviour)
+    |> List.flatten()
+    |> Enum.member?(Khafra.SearchBehaviour)
+  rescue
+    _ -> false
+  end
+end
