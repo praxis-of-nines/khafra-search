@@ -35,6 +35,17 @@ defmodule Khafra do
     |> Log.create_table()
   end
 
+  @doc """
+  Trigger jigged maintenance on all registered table servers
+  """
+  def trigger_maintenance, do: SearchTable.trigger_maintenance()
+
+  @doc "Get Observer state; list of search tables"
+  def peek(:observer), do: SearchTable.peek(:observer)
+
+  @doc "Get a search tables state from the schema it backs"
+  def peek(:table, schema), do: SearchTable.peek(:table, schema)
+
   # PRIVATE FUNCTIONS
   ###################
   defp maybe_replace({:ok, entity}, opts) do
@@ -50,7 +61,6 @@ defmodule Khafra do
   defp maybe_replace(result, _opts), do: result
 
   defp maybe_replace(true, entity, opts) do
-    # [update_strategy: :naive, update_all_strategy: :queue]
     _ = entity
         |> SearchTable.replace(Keyword.get(opts, :strategy))
         |> Log.replace()

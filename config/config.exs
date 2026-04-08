@@ -54,6 +54,14 @@ config :khafra_search, :index_defaults,
   html_strip: "0",
   preopen: "0"
 
+config :khafra_search, Khafra.Scheduler,
+  jobs: [
+    table_maintenance: [
+      schedule: "@daily",
+      task: {Khafra, :trigger_maintenance, []}
+    ]
+  ]
+
 config :lapin, :connections, [
   [
     module: Khafra.Queue.ManageTableConsumer,

@@ -2,7 +2,12 @@ defmodule Khafra.SearchTable do
   @moduledoc """
   Search Table methods
   """
-  alias Khafra.SearchTable.{BatchOperations, Operations}
+  alias Khafra.SearchTable.{
+                             BatchOperations,
+                             Operations,
+                             TableObserver,
+                             TableServer
+                           }
 
   @doc """
   Insert or update a table row
@@ -37,8 +42,27 @@ defmodule Khafra.SearchTable do
     Operations.create(schema, table_type, opts)
   end
 
+  @doc """
+  Trigger jigged maintenance on all registered table servers
+  """
+  def trigger_maintenance, do: TableObserver.lookup()
+                               |> pid()
+                               |> GenServer.cast(:maintain_all)
+
+  @doc "Get Observer state; list of search tables"
+  def peek(:observer), do: TableObserver.lookup()
+                           |> pid()
+                           |> GenServer.call(:peek)
+
+  @doc "Get a search tables state from the schema it backs"
+  def peek(:table, schema), do: TableServer.lookup(schema)
+                                |> pid()
+                                |> GenServer.call(:peek)
+
   # PRIVATE FUNCTIONS
   ###################
+  defp pid({pid, _meta}), do: pid
+
   defp default_create_opts do
     [
       {:type, :rt},

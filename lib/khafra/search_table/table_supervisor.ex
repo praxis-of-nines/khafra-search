@@ -7,7 +7,9 @@ defmodule Khafra.SearchTable.TableSupervisor do
 
   def start_link(init_arg) do
     {:ok, pid} = DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
+    
     start_table_servers()
+    
     {:ok, pid}
   end
 
@@ -34,14 +36,21 @@ defmodule Khafra.SearchTable.TableSupervisor do
   Return all loaded modules that implement Khafra.SearchBehaviour.
   """
   def search_schemas do
-    :code.all_loaded()
-    |> Enum.map(fn {module, _} -> module end)
+    :application.loaded_applications()
+    |> Enum.flat_map(fn {app, _, _} ->
+      case :application.get_key(app, :modules) do
+        {:ok, modules} -> modules
+        _ -> []
+      end
+    end)
     |> Enum.filter(&implements_search_behaviour?/1)
   end
 
   # PRIVATE FUNCTIONS
   ###################
   defp implements_search_behaviour?(module) do
+    Code.ensure_loaded(module)
+
     module.module_info(:attributes)
     |> Keyword.get_values(:behaviour)
     |> List.flatten()
