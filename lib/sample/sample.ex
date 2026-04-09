@@ -32,7 +32,7 @@ defmodule Khafra.Sample do
   @doc "Find cities from search tables"
   def find_cities(search_string) do
     ManticoreQL.new()
-    |> ManticoreQL.from("testschema")
+    |> ManticoreQL.from("test_dist")
     |> ManticoreQL.match("*#{search_string}*")
     |> Giza.send()
   end

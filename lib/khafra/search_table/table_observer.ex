@@ -43,6 +43,7 @@ defmodule Khafra.SearchTable.TableObserver do
   def handle_info(:create_distributed_tables, state) do
     schemas = TableSupervisor.search_schemas()
 
+    # Ensure each table has a distributed version
     Enum.each(schemas, fn schema ->
       Operations.create(struct(schema), :distributed, [])
     end)

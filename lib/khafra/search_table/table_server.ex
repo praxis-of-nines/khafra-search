@@ -6,6 +6,7 @@ defmodule Khafra.SearchTable.TableServer do
 
   alias Giza.SearchTables
   alias Giza.Structs.SphinxqlResponse
+  alias Khafra.SearchTable.Operations
   alias Khafra.Serialize
   alias Khafra.Struct.TableServerState
 
@@ -26,7 +27,12 @@ defmodule Khafra.SearchTable.TableServer do
                  |> struct()
                  |> Serialize.table_name()
 
-    {:ok, update_table_status(%TableServerState{schema: schema, search_table: search_table})}
+    {
+      :ok,
+      %TableServerState{schema: schema, search_table: search_table}
+      |> ensure_table()
+      |> update_table_status()
+    }
   end
 
   @doc "Look up the pid for a table server by schema module"
@@ -52,6 +58,12 @@ defmodule Khafra.SearchTable.TableServer do
 
   # PRIVATE FUNCTIONS
   ###################
+  defp ensure_table(%TableServerState{schema: schema} = state) do
+     _ = Operations.create(schema, :rt, [])
+
+     state
+  end
+
   defp optimize_table(%TableServerState{search_table: search_table} = state) do
     _ = SearchTables.optimize_table(search_table)
 

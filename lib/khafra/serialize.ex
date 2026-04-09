@@ -18,6 +18,8 @@ defmodule Khafra.Serialize do
     |> String.trim_trailing("schema")
   end
 
+  def table_name(schema) when is_atom(schema), do: table_name(struct(schema))
+
   def table_name(table_name), do: table_name
 
   @doc """

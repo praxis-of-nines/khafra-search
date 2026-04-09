@@ -47,15 +47,17 @@ defmodule Khafra.SearchTable.Operations do
 
   """
   def create(schema, :distributed, opts) do
+    table_name = Serialize.table_name(schema)
+
     agents = opts
              |> Keyword.get(
                :agents,
                configured_agents()
              )
-             |> Enum.map(fn agent -> {:agent, agent} end)
+             |> Enum.map(fn agent -> {:agent, "#{agent}:#{table_name}"} end)
              
-    schema
-    |> Serialize.table_name()
+    table_name
+    |> into_distributed_name()
     |> SearchTables.create_distributed_table(agents, opts)
   end
 
@@ -63,10 +65,16 @@ defmodule Khafra.SearchTable.Operations do
     schema
     |> Serialize.table_name()
     |> SearchTables.create_table_if_not_exists(
-         Serialize.search_table_schema(schema),
-         [{:type, :rt} | opts]
+         Serialize.search_table_schema(struct(schema)),
+         opts
        )
   end
+
+  @doc """
+  Derive the regular table name into the distributed name
+  khafra standardizes
+  """
+  def into_distributed_name(name), do: "#{name}_dist"
 
   # PRIVATE FUNCTIONS
   ###################

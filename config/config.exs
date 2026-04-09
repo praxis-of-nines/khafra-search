@@ -17,7 +17,7 @@ config :khafra_search, :strategies,
 config :khafra_search, :distribution,
   tables: :all,
   agents: [
-    "localhost:9312:default_shard"
+    "localhost:9312"
   ]
 
 # Database configuration.  The Repo you will index
