@@ -5,6 +5,8 @@ defmodule Khafra.SearchTable.TableSupervisor do
   """
   use DynamicSupervisor
 
+  require Logger
+
   def start_link(init_arg) do
     {:ok, pid} = DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
     
@@ -23,12 +25,14 @@ defmodule Khafra.SearchTable.TableSupervisor do
   for every schema that implements SearchBehaviour.
   """
   def start_table_servers do
-    search_schemas()
-    |> Enum.each(fn schema ->
-      DynamicSupervisor.start_child(
-        __MODULE__,
-        {Khafra.SearchTable.TableServer, schema}
-      )
+    Enum.each(search_schemas(), fn schema ->
+      case DynamicSupervisor.start_child(__MODULE__, {Khafra.SearchTable.TableServer, schema}) do
+        {:ok, _pid} ->
+          :ok
+
+        {:error, reason} ->
+          Logger.error("Failed to start TableServer for #{inspect(schema)}: #{inspect(reason)}")
+      end
     end)
   end
 

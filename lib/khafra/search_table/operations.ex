@@ -76,6 +76,25 @@ defmodule Khafra.SearchTable.Operations do
   """
   def into_distributed_name(name), do: "#{name}_dist"
 
+  @doc """
+  Drop a table if it exists
+  """
+  def drop_table(schema) when is_atom(schema) do
+    schema
+    |> Serialize.table_name()
+    |> SearchTables.drop_table(if_exists: true)
+  end
+
+  @doc """
+  Drop a tables distributed index
+  """
+  def drop_distributed_index(schema) when is_atom(schema) do
+    schema
+    |> Serialize.table_name()
+    |> into_distributed_name()
+    |> SearchTables.drop_table(if_exists: true)
+  end
+
   # PRIVATE FUNCTIONS
   ###################
   defp configured_agents() do

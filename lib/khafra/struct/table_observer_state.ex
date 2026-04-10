@@ -1,3 +1,3 @@
 defmodule Khafra.Struct.TableObserverState do
-  defstruct tables: %{}
+  defstruct tables: %{}, schemas: []
 end

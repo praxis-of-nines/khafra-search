@@ -42,22 +42,19 @@ defmodule Khafra.SearchTable do
     Operations.create(schema, table_type, opts)
   end
 
-  @doc """
-  Trigger jigged maintenance on all registered table servers
-  """
-  def trigger_maintenance, do: TableObserver.lookup()
-                               |> pid()
-                               |> GenServer.cast(:maintain_all)
-
   @doc "Get Observer state; list of search tables"
-  def peek(:observer), do: TableObserver.lookup()
-                           |> pid()
-                           |> GenServer.call(:peek)
+  def peek(:observer), do: GenServer.call(TableObserver, :peek)
 
   @doc "Get a search tables state from the schema it backs"
   def peek(:table, schema), do: TableServer.lookup(schema)
                                 |> pid()
                                 |> GenServer.call(:peek)
+
+  @doc "Delete a table"
+  def drop_table(schema), do: Operations.drop_table(schema)
+
+  @doc "Delete a distributed index"
+  def drop_distributed_index(schema), do: Operations.drop_distributed_index(schema)
 
   # PRIVATE FUNCTIONS
   ###################

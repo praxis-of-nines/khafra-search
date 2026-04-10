@@ -3,7 +3,7 @@ defmodule Khafra do
   Khafra: The distributed search deployment platform
   """
   alias Khafra.Log
-  alias Khafra.SearchTable
+  alias Khafra.{SearchTable, Observer}
 
   @doc """
   Insert, creating table if it does not exist yet
@@ -38,13 +38,27 @@ defmodule Khafra do
   @doc """
   Trigger jigged maintenance on all registered table servers
   """
-  def trigger_maintenance, do: SearchTable.trigger_maintenance()
+  def trigger_maintenance, do: Observer.trigger_maintenance()
 
   @doc "Get Observer state; list of search tables"
   def peek(:observer), do: SearchTable.peek(:observer)
 
   @doc "Get a search tables state from the schema it backs"
   def peek(:table, schema), do: SearchTable.peek(:table, schema)
+
+  @doc """
+  Remove all tables. Generally for testing. This drops for the
+  current node only
+  """
+  def destroy_all do
+    Observer.get_schemas()
+    |> Enum.map(fn schema ->
+      {
+        SearchTable.drop_table(schema),
+        SearchTable.drop_distributed_index(schema)
+      }
+    end)
+  end
 
   # PRIVATE FUNCTIONS
   ###################
