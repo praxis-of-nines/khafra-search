@@ -20,17 +20,6 @@ config :khafra_search, :distribution,
     "localhost:9312"
   ]
 
-# Database configuration.  The Repo you will index
-config :khafra_search, :source_sqldb,
-  adapter: :postgres, # :mysql
-  database: "",
-  username: "",
-  password: "",
-  hostname: "localhost"
-
-# Command defaults for indexer settings
-config :khafra_search, :indexer,
-  mem_limit: "1024M"
 
 # Common defaults for search daemon settings
 config :khafra_search, :searchd,
@@ -41,18 +30,6 @@ config :khafra_search, :searchd,
   query_log: "../../../log/query.log",
   pid_file: "../../data/searchd.pid",
   network_timeout: "2"
-
-# Common index defaults: by default the parent of any index created
-config :khafra_search, :index_defaults,
-  type: "plain",
-  source: {:sql, :source_sqldb},
-  path: "../../data/default",
-  morphology: "none",
-  min_stemming_len: "1",
-  min_word_len: "1",
-  min_infix_len: "2",
-  html_strip: "0",
-  preopen: "0"
 
 config :khafra_search, Khafra.Scheduler,
   jobs: [

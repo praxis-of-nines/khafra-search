@@ -15,6 +15,43 @@ defmodule Khafra do
   """
   def update(result, opts \\ []), do: maybe_replace(result, opts)
 
+
+  @doc """
+  Taking a query from an ORM or SQL struct build a giza query to a distributed
+  table using the standardized khafra naming. Takes advantage of giza passthrough
+  to ignore nil values. Note that depending on SearchBehaviour fields indexed,
+  some queries would fail such as asking to constrain where on a field not existing
+  in the search index.
+
+  Supports
+  
+    * Ecto
+    * https://github.com/elixir-dbvisor/sql
+    * Manual table call
+  """
+  def match(table_or_query, search_for, opts \\ [])
+
+  def match(%SQL{from: from, where: where}, search_for, _opts) do
+    ManticoreQL.new()
+    |> ManticoreQL.from("#{from}_dist")
+    |> ManticoreQL.where(where)
+    |> Giza.send()
+  end
+
+  def match(%schema{where: where}, search_for, _opts) do
+    ManticoreQL.new()
+    |> ManticoreQL.from("#{Serialize.table_name(schema)}_dist")
+    |> ManticoreQL.where(where)
+    |> Giza.send()
+  end 
+
+  def match(table, search_for, _opts) do
+    ManticoreQL.new()
+    |> ManticoreQL.from("#{table}_dist")
+    |> ManticoreQL.match("*#{search_for}*")
+    |> Giza.send()
+  end
+
   @doc """
   Works off a struct which represents a table name and fills all search
   rows. Note this can be an expensive operation on large tables; use 
@@ -76,7 +113,7 @@ defmodule Khafra do
 
   defp maybe_replace(true, entity, opts) do
     _ = entity
-        |> SearchTable.replace(Keyword.get(opts, :strategy))
+        |> SearchTable.replace(opts)
         |> Log.replace()
 
     entity

@@ -28,10 +28,10 @@ defmodule Khafra.MixProject do
       {:syn, "~> 3.4"},
       {:lapin, "~> 2.0.0"},
       {:phoenix_live_dashboard, "~> 0.8", optional: true},
-      # Used for testing
-      {:ecto, "~> 3.13", only: :dev},
-      {:ecto_sql, "~> 3.12", only: :dev},
-      {:postgrex, "~> 0.22", only: :dev}
+      {:ecto, "~> 3.13"},
+      {:ecto_sql, "~> 3.12"},
+      {:postgrex, "~> 0.22"},
+      {:sql, "~> 0.5.0"}
     ]
   end
 
