@@ -9,6 +9,13 @@ defmodule Khafra.Serialize do
   A schema mapped to a search table name. If a non-schema is passed its assumed to already be
   a valid table name
   """
+  def table_name(%SQL{string: string}) when is_binary(string) do
+    case Regex.run(~r/\bfrom\s+(\w+)/i, string) do
+      [_, table] -> String.downcase(table)
+      _ -> nil
+    end
+  end
+
   def table_name(%schema{}) do
     schema
     |> Atom.to_string()
@@ -25,6 +32,8 @@ defmodule Khafra.Serialize do
   @doc """
   Return a flat list of string keys that map to search values
   """
+  def keys(%SQL{columns: columns}), do: columns
+
   def keys(%schema{} = entity) do
     entity
     |> Map.take([:id, :updated_at | schema.index_fields()])
@@ -34,6 +43,8 @@ defmodule Khafra.Serialize do
   @doc """
   Return a flat list of value from an entity
   """
+  def values(%SQL{params: params}), do: params
+
   def values(%schema{} = entity) do
     entity
     |> Map.take([:id, :updated_at | schema.index_fields()])
@@ -52,6 +63,11 @@ defmodule Khafra.Serialize do
   @doc """
   Return a list of search table fields derived from a database schema
   """
+  def search_table_schema(%SQL{columns: columns, types: types}) do
+    Enum.zip(columns, types)
+    |> Enum.map(fn {col, type} -> {col, sql_to_manticore_type(type)} end)
+  end
+
   def search_table_schema(%schema{}) do
     :fields
     |> schema.__schema__()
@@ -89,4 +105,24 @@ defmodule Khafra.Serialize do
   defp ecto_to_manticore_type({:array, _}),     do: :json
   # Fallback
   defp ecto_to_manticore_type(_),               do: :string
+
+  # SQL type mappings
+  defp sql_to_manticore_type(:int2),            do: :bigint
+  defp sql_to_manticore_type(:int4),            do: :bigint
+  defp sql_to_manticore_type(:int8),            do: :bigint
+  defp sql_to_manticore_type(:integer),         do: :bigint
+  defp sql_to_manticore_type(:bigint),          do: :bigint
+  defp sql_to_manticore_type(:float4),          do: :float
+  defp sql_to_manticore_type(:float8),          do: :float
+  defp sql_to_manticore_type(:numeric),         do: :float
+  defp sql_to_manticore_type(:bool),            do: :bool
+  defp sql_to_manticore_type(:boolean),         do: :bool
+  defp sql_to_manticore_type(:text),            do: :text
+  defp sql_to_manticore_type(:varchar),         do: :text
+  defp sql_to_manticore_type(:json),            do: :json
+  defp sql_to_manticore_type(:jsonb),           do: :json
+  defp sql_to_manticore_type(:timestamp),       do: :bigint
+  defp sql_to_manticore_type(:timestamptz),     do: :bigint
+  defp sql_to_manticore_type(:date),            do: :uint
+  defp sql_to_manticore_type(_),                do: :string
 end

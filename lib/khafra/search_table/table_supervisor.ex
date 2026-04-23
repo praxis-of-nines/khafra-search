@@ -22,7 +22,7 @@ defmodule Khafra.SearchTable.TableSupervisor do
 
   @doc """
   Called after the supervisor is started to spin up a TableServer
-  for every schema that implements SearchBehaviour.
+  for every schema that implements SearchBehaviour or SearchBehaviourSQL.
   """
   def start_table_servers do
     Enum.each(search_schemas(), fn schema ->
@@ -34,12 +34,37 @@ defmodule Khafra.SearchTable.TableSupervisor do
           Logger.error("Failed to start TableServer for #{inspect(schema)}: #{inspect(reason)}")
       end
     end)
+
+    Enum.each(sql_modules(), fn module ->
+      case DynamicSupervisor.start_child(__MODULE__, {Khafra.SearchTable.TableServer, {:sql, module}}) do
+        {:ok, _pid} ->
+          :ok
+
+        {:error, reason} ->
+          Logger.error("Failed to start TableServer for SQL module #{inspect(module)}: #{inspect(reason)}")
+      end
+    end)
   end
 
   @doc """
   Return all loaded modules that implement Khafra.SearchBehaviour.
   """
   def search_schemas do
+    all_modules()
+    |> Enum.filter(&implements_behaviour?(&1, Khafra.SearchBehaviour))
+  end
+
+  @doc """
+  Return all loaded modules that implement Khafra.SearchBehaviourSQL.
+  """
+  def sql_modules do
+    all_modules()
+    |> Enum.filter(&implements_behaviour?(&1, Khafra.SearchBehaviourSQL))
+  end
+
+  # PRIVATE FUNCTIONS
+  ###################
+  defp all_modules do
     :application.loaded_applications()
     |> Enum.flat_map(fn {app, _, _} ->
       case :application.get_key(app, :modules) do
@@ -47,18 +72,15 @@ defmodule Khafra.SearchTable.TableSupervisor do
         _ -> []
       end
     end)
-    |> Enum.filter(&implements_search_behaviour?/1)
   end
 
-  # PRIVATE FUNCTIONS
-  ###################
-  defp implements_search_behaviour?(module) do
+  defp implements_behaviour?(module, behaviour) do
     Code.ensure_loaded(module)
 
     module.module_info(:attributes)
     |> Keyword.get_values(:behaviour)
     |> List.flatten()
-    |> Enum.member?(Khafra.SearchBehaviour)
+    |> Enum.member?(behaviour)
   rescue
     _ -> false
   end

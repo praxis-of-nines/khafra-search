@@ -95,6 +95,32 @@ defmodule Khafra.SearchTable.Operations do
     |> SearchTables.drop_table(if_exists: true)
   end
 
+  @doc """
+  Create a table from a SearchBehaviourSQL module.
+  """
+  def create_from_sql_behaviour(module, :rt, opts) do
+    table_name = Atom.to_string(module.table_name())
+
+    fields =
+      module.index_fields()
+      |> Enum.map(fn {name, type} -> {name, behaviour_to_manticore_type(type)} end)
+
+    SearchTables.create_table_if_not_exists(table_name, fields, opts)
+  end
+
+  def create_from_sql_behaviour(module, :distributed, opts) do
+    table_name = Atom.to_string(module.table_name())
+
+    agents =
+      opts
+      |> Keyword.get(:agents, configured_agents())
+      |> Enum.map(fn agent -> {:agent, "#{agent}:#{table_name}"} end)
+
+    table_name
+    |> into_distributed_name()
+    |> SearchTables.create_distributed_table(agents, opts)
+  end
+
   # PRIVATE FUNCTIONS
   ###################
   defp configured_agents() do
@@ -102,4 +128,16 @@ defmodule Khafra.SearchTable.Operations do
     |> Application.get_env(:distribution)
     |> Keyword.get(:agents)
   end
+
+  defp behaviour_to_manticore_type(:integer), do: :bigint
+  defp behaviour_to_manticore_type(:bigint),  do: :bigint
+  defp behaviour_to_manticore_type(:float),   do: :float
+  defp behaviour_to_manticore_type(:string),  do: :text
+  defp behaviour_to_manticore_type(:text),    do: :text
+  defp behaviour_to_manticore_type(:bool),    do: :bool
+  defp behaviour_to_manticore_type(:boolean), do: :bool
+  defp behaviour_to_manticore_type(:json),    do: :json
+  defp behaviour_to_manticore_type(:timestamp), do: :bigint
+  defp behaviour_to_manticore_type(:date),    do: :uint
+  defp behaviour_to_manticore_type(type),     do: type
 end

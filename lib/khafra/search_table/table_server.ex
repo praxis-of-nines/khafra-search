@@ -13,6 +13,14 @@ defmodule Khafra.SearchTable.TableServer do
   @scope :search_tables
   @max_jitter_ms :timer.minutes(60)
 
+  def start_link({:sql, module}) do
+    GenServer.start_link(
+      __MODULE__,
+      {:sql, module},
+      name: {:via, :syn, {@scope, {:table, module}, %{module: module}}}
+    )
+  end
+
   def start_link(schema) do
     GenServer.start_link(
       __MODULE__,
@@ -22,6 +30,17 @@ defmodule Khafra.SearchTable.TableServer do
   end
 
   @impl true
+  def init({:sql, module}) do
+    search_table = Atom.to_string(module.table_name())
+
+    {
+      :ok,
+      %TableServerState{schema: module, search_table: search_table}
+      |> ensure_sql_table(module)
+      |> update_table_status()
+    }
+  end
+
   def init(schema) do
     search_table = schema
                  |> struct()
@@ -35,7 +54,7 @@ defmodule Khafra.SearchTable.TableServer do
     }
   end
 
-  @doc "Look up the pid for a table server by schema module"
+  @doc "Look up the pid for a table server by schema or SQL behaviour module"
   def lookup(schema), do: :syn.lookup(@scope, {:table, schema})
 
   @impl true
@@ -62,6 +81,12 @@ defmodule Khafra.SearchTable.TableServer do
      _ = Operations.create(schema, :rt, [])
 
      state
+  end
+
+  defp ensure_sql_table(state, module) do
+    _ = Operations.create_from_sql_behaviour(module, :rt, [])
+
+    state
   end
 
   defp optimize_table(%TableServerState{search_table: search_table} = state) do

@@ -2,8 +2,9 @@ defmodule Khafra do
   @moduledoc """
   Khafra: The distributed search deployment platform
   """
+  alias Giza.ManticoreQL
   alias Khafra.Log
-  alias Khafra.{SearchTable, Observer}
+  alias Khafra.{SearchTable, Observer, Serialize}
 
   @doc """
   Insert, creating table if it does not exist yet
@@ -29,26 +30,25 @@ defmodule Khafra do
     * https://github.com/elixir-dbvisor/sql
     * Manual table call
   """
-  def match(table_or_query, search_for, opts \\ [])
+  def match(table_or_query, opts \\ [])
 
-  def match(%SQL{from: from, where: where}, search_for, _opts) do
+  def match(%SQL{string: string} = sql, _opts) do
+    table = Serialize.table_name(sql)
+
+    dist_string =
+      Regex.replace(~r/(\bfrom\s+)#{Regex.escape(table)}/i, string, "\\1#{table}_dist",
+        global: false
+      )
+
     ManticoreQL.new()
-    |> ManticoreQL.from("#{from}_dist")
-    |> ManticoreQL.where(where)
+    |> ManticoreQL.raw(dist_string)
     |> Giza.send()
   end
 
-  def match(%schema{where: where}, search_for, _opts) do
+  def match(%schema{where: where}, _opts) do
     ManticoreQL.new()
     |> ManticoreQL.from("#{Serialize.table_name(schema)}_dist")
-    |> ManticoreQL.where(where)
-    |> Giza.send()
-  end 
-
-  def match(table, search_for, _opts) do
-    ManticoreQL.new()
-    |> ManticoreQL.from("#{table}_dist")
-    |> ManticoreQL.match("*#{search_for}*")
+    |> ManticoreQL.match("*#{where}*")
     |> Giza.send()
   end
 

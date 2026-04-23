@@ -34,19 +34,24 @@ defmodule Khafra.SearchTable.TableObserver do
   @impl true
   def handle_info(:create_distributed_tables, state) do
     schemas = TableSupervisor.search_schemas()
+    sql_modules = TableSupervisor.sql_modules()
 
-    # Ensure each table has a distributed version
+    # Ensure each Ecto table has a distributed version
     Enum.each(schemas, fn schema ->
       Operations.create(struct(schema), :distributed, [])
     end)
 
+    # Ensure each SQL table has a distributed version
+    Enum.each(sql_modules, fn module ->
+      Operations.create_from_sql_behaviour(module, :distributed, [])
+    end)
+
     tables =
-      schemas
-      |> Map.new(fn schema ->
-        {pid, _meta} = TableServer.lookup(schema)
-        {schema, pid}
+      Map.new(schemas ++ sql_modules, fn mod ->
+        {pid, _meta} = TableServer.lookup(mod)
+        {mod, pid}
       end)
 
-    {:noreply, %{state | tables: tables, schemas: schemas}}
+    {:noreply, %{state | tables: tables, schemas: schemas, sql_modules: sql_modules}}
   end
 end
