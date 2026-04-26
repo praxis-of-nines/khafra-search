@@ -30,7 +30,8 @@ defmodule Khafra.Serialize do
   def table_name(table_name), do: table_name
 
   @doc """
-  Return a flat list of string keys that map to search values
+  Return a flat list of string keys that map to search values. Accepts a full SQL
+  query; a row result (ecto schema struct) or a keyword list row return from SQL
   """
   def keys(%SQL{columns: columns}), do: columns
 
@@ -39,6 +40,8 @@ defmodule Khafra.Serialize do
     |> Map.take([:id, :updated_at | schema.index_fields()])
     |> Map.keys()
   end
+
+  def keys(row) when is_list(row), do: Keyword.keys(row)
 
   @doc """
   Return a flat list of value from an entity
@@ -59,6 +62,8 @@ defmodule Khafra.Serialize do
            val
        end)
   end
+
+  def values(row) when is_list(row), do: Keyword.values(row)
 
   @doc """
   Return a list of search table fields derived from a database schema

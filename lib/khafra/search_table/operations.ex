@@ -9,29 +9,33 @@ defmodule Khafra.SearchTable.Operations do
   @exchange "table_manager_exchange"
   @exchange_key "manage_tables_key"
 
+  # Defaults applied to every RT table creation regardless of caller. Centralised
+  # here so that direct callers (e.g. `TableServer` at startup) get the same
+  # behaviour as `Khafra.create_table/2` going through `SearchTable.create/2`.
+  @default_rt_opts [fuzzy_match: true]
+
   @doc """
   Insert or update a table row
   """
-  def replace(entity, strategy \\ :immediate)
+  def replace(table_name, row, strategy \\ :immediate)
 
-  def replace(%{} = entity, nil) do
-    replace(entity, :immediate)
+  def replace(table_name, row, nil) do
+    replace(table_name, row, :immediate)
   end
 
-  def replace(%{} = entity, :immediate) do
-    entity
-    |> Serialize.table_name()
+  def replace(table_name, row, :immediate) do
+    table_name
     |> SearchTables.replace(
-         Serialize.keys(entity),
-         Serialize.values(entity)
+         Serialize.keys(row),
+         Serialize.values(row)
        )
   end
 
-  def replace(%{} = entity, :queue) do
+  def replace(table_name, row, :queue) do
     ManageTableProducer.publish(
       @exchange,
       @exchange_key,
-      :erlang.term_to_binary({:record_op, fn -> replace(entity, :immediate) end})
+      :erlang.term_to_binary({:record_op, fn -> replace(table_name, row, :immediate) end})
     )
   end
 
@@ -40,11 +44,11 @@ defmodule Khafra.SearchTable.Operations do
 
   ## Real Time (rt)
 
-
+  Standard real time table that accepts inserts/updates and is always searchable
 
   ## Distributed
 
-
+  A reference to a group of RT tables (not in itself a table)
   """
   def create(schema, :distributed, opts) do
     table_name = Serialize.table_name(schema)
@@ -57,7 +61,7 @@ defmodule Khafra.SearchTable.Operations do
              |> Enum.map(fn agent -> {:agent, "#{agent}:#{table_name}"} end)
              
     table_name
-    |> into_distributed_name()
+    |> Khafra.into_distributed_name()
     |> SearchTables.create_distributed_table(agents, opts)
   end
 
@@ -66,15 +70,9 @@ defmodule Khafra.SearchTable.Operations do
     |> Serialize.table_name()
     |> SearchTables.create_table_if_not_exists(
          Serialize.search_table_schema(struct(schema)),
-         opts
+         Keyword.merge(@default_rt_opts, opts)
        )
   end
-
-  @doc """
-  Derive the regular table name into the distributed name
-  khafra standardizes
-  """
-  def into_distributed_name(name), do: "#{name}_dist"
 
   @doc """
   Drop a table if it exists
@@ -91,7 +89,7 @@ defmodule Khafra.SearchTable.Operations do
   def drop_distributed_index(schema) when is_atom(schema) do
     schema
     |> Serialize.table_name()
-    |> into_distributed_name()
+    |> Khafra.into_distributed_name()
     |> SearchTables.drop_table(if_exists: true)
   end
 
@@ -105,7 +103,11 @@ defmodule Khafra.SearchTable.Operations do
       module.index_fields()
       |> Enum.map(fn {name, type} -> {name, behaviour_to_manticore_type(type)} end)
 
-    SearchTables.create_table_if_not_exists(table_name, fields, opts)
+    SearchTables.create_table_if_not_exists(
+      table_name,
+      fields,
+      Keyword.merge(@default_rt_opts, opts)
+    )
   end
 
   def create_from_sql_behaviour(module, :distributed, opts) do
@@ -117,7 +119,7 @@ defmodule Khafra.SearchTable.Operations do
       |> Enum.map(fn agent -> {:agent, "#{agent}:#{table_name}"} end)
 
     table_name
-    |> into_distributed_name()
+    |> Khafra.into_distributed_name()
     |> SearchTables.create_distributed_table(agents, opts)
   end
 

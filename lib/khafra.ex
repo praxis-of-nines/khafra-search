@@ -32,16 +32,13 @@ defmodule Khafra do
   """
   def match(table_or_query, opts \\ [])
 
-  def match(%SQL{string: string} = sql, _opts) do
+  def match(%SQL{} = sql, _opts) do
     table = Serialize.table_name(sql)
 
-    dist_string =
-      Regex.replace(~r/(\bfrom\s+)#{Regex.escape(table)}/i, string, "\\1#{table}_dist",
-        global: false
-      )
-
     ManticoreQL.new()
-    |> ManticoreQL.raw(dist_string)
+    |> ManticoreQL.from("#{table}_dist")
+    |> ManticoreQL.select(select_fields(sql))
+    |> apply_match(match_phrase(sql))
     |> Giza.send()
   end
 
@@ -57,7 +54,7 @@ defmodule Khafra do
   rows. Note this can be an expensive operation on large tables; use 
   options to schedule work if necessary.
   """
-  def refresh_table(schema, opts \\ []) when is_atom(schema) do
+  def refresh_table(schema, opts \\ []) do
     schema
     |> SearchTable.batch_replace(opts)
     |> Log.batch_operation()
@@ -97,8 +94,64 @@ defmodule Khafra do
     end)
   end
 
+  @doc """
+  Derive the regular table name into the distributed name
+  khafra standardizes
+  """
+  def into_distributed_name(name), do: "#{name}_dist"
+
   # PRIVATE FUNCTIONS
   ###################
+  defp apply_match(query, nil), do: query
+  defp apply_match(query, phrase), do: ManticoreQL.match(query, phrase)
+
+  defp select_fields(%SQL{string: string}) do
+    case Regex.run(~r/\bselect\s+(.+?)\s+from\b/is, string) do
+      [_, fields] ->
+        fields
+        |> String.split(",")
+        |> Enum.map(&String.trim/1)
+        |> Enum.reject(&(&1 == ""))
+
+      _ ->
+        ["*"]
+    end
+  end
+
+  # Translate a SQL `WHERE field = 'value' [AND field = 'value']...` clause into
+  # Manticore's full-text MATCH syntax (`@field "value" ...`). Manticore disallows
+  # attribute-style filters on stored fields, so equality predicates on
+  # full-text fields must be expressed as MATCH expressions instead.
+  defp match_phrase(%SQL{string: string}) do
+    with [_, where] <-
+           Regex.run(
+             ~r/\bwhere\s+(.+?)(?:\s+(?:order\s+by|group\s+by|limit|offset)\b|$)/is,
+             string
+           ),
+         phrase when phrase != "" <- where_to_match(where) do
+      phrase
+    else
+      _ -> nil
+    end
+  end
+
+  defp where_to_match(where) do
+    ~r/(\w+)\s*=\s*'([^']*)'/
+    |> Regex.scan(where)
+    |> Enum.map_join(" ", fn [_, field, value] ->
+      "@#{field} #{infix(value)}"
+    end)
+  end
+
+  # Wrap each whitespace-separated token in `*...*` so Manticore performs an
+  # infix match per word (mirrors the `%schema{}` clause's `"*#{where}*"`
+  # behavior, but applied per-word so multi-word values still match as infixes).
+  defp infix(value) do
+    value
+    |> String.split()
+    |> Enum.map_join(" ", &"*#{&1}*")
+  end
+
   defp maybe_replace({:ok, entity}, opts) do
     {:ok, maybe_replace(entity, opts)}
   end

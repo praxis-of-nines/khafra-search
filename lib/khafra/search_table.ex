@@ -12,8 +12,8 @@ defmodule Khafra.SearchTable do
   @doc """
   Insert or update a table row
   """
-  def replace(entity, opts \\ []) do
-    Operations.replace(entity, Keyword.get(opts, :strategy))
+  def replace(table_name, row, opts \\ []) do
+    Operations.replace(table_name, row, Keyword.get(opts, :strategy))
   end
 
   @doc """
@@ -22,7 +22,7 @@ defmodule Khafra.SearchTable do
   def batch_replace(query, opts \\ []) do
     BatchOperations.batch_update(
       query,
-      &replace/1,
+      &replace/3,
       Keyword.get(opts, :strategy, :stream)
     )
   end
