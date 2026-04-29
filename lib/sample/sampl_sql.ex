@@ -4,7 +4,11 @@ defmodule Khafra.Sample.SampleSQL do
   how one might integrate khafra smoothly with their app using the SQL library
   instead of Ecto.
   """
-  import SQL
+  # `use SQL, pool: :default` reads the pool's adapter (Postgres in dev.exs) and
+  # stores it on the module's `@sql_config`, so `~SQL` sigils in this module are
+  # formatted with Postgres-flavored placeholders (`$1`, `$2`...) instead of the
+  # ANSI default (`?`), which Postgres would reject with a syntax error.
+  use SQL, pool: :default
 
   alias Giza.{ManticoreQL, SearchTables}
   alias Khafra.Sample.TestSql
@@ -12,22 +16,22 @@ defmodule Khafra.Sample.SampleSQL do
   @table Atom.to_string(TestSql.table_name())
 
   @doc "Add book"
-  def add_book(%{title: title, description: description}, _opts) do
-    Enum.to_list(~SQL"INSERT INTO books (title, description) VALUES ({{title}}, {{description}})")
+  def add_book(%{id: id, title: title, description: description}, _opts) do
+    Enum.to_list(~SQL"INSERT INTO book (id, title, description) VALUES ({{id}}, {{title}}, {{description}})")
 
-    SearchTables.replace(@table, ["title", "description"], [title, description])
+    SearchTables.replace(@table, ["id", "title", "description"], [id, title, description])
   end
 
   @doc "Update book"
-  def update_book(book_id, %{title: title, description: description}, _opts) do
-    Enum.to_list(~SQL"UPDATE books SET title = {{title}}, description = {{description}} WHERE id = {{book_id}}")
+  def update_book(id, %{title: title, description: description}, _opts) do
+    Enum.to_list(~SQL"UPDATE book SET title = {{title}}, description = {{description}} WHERE id = {{id}}")
 
-    SearchTables.replace(@table, ["id", "title", "description"], [book_id, title, description])
+    SearchTables.replace(@table, ["id", "title", "description"], [id, title, description])
   end
 
   @doc "Retrieve a book"
   def get_book(id) do
-    ~SQL"FROM books SELECT id, title, description WHERE id = {{id}}"
+    ~SQL"FROM book SELECT id, title, description WHERE id = {{id}}"
     |> Enum.to_list()
     |> List.first()
   end
@@ -37,6 +41,6 @@ defmodule Khafra.Sample.SampleSQL do
     ManticoreQL.new()
     |> ManticoreQL.from("#{@table}_dist")
     |> ManticoreQL.match("*#{search_string}*")
-    |> Giza.send()
+    |> Giza.send!()
   end
 end
