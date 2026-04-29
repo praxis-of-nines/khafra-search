@@ -24,7 +24,7 @@ defmodule Khafra.MixProject do
     [
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:quantum, "~> 3.0"},
-      {:giza_sphinxsearch, path: "../giza_sphinxsearch"},
+      {:giza_sphinxsearch, "~> 2.1.1"},
       {:syn, "~> 3.4"},
       {:lapin, "~> 2.0.0"},
       {:phoenix_live_dashboard, "~> 0.8", optional: true},
