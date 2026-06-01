@@ -70,7 +70,9 @@ defmodule Khafra.SearchTable.Operations do
     |> Serialize.table_name()
     |> SearchTables.create_table_if_not_exists(
          Serialize.search_table_schema(struct(schema)),
-         Keyword.merge(@default_rt_opts, opts)
+         @default_rt_opts
+         |> Keyword.merge(schema_table_options(schema))
+         |> Keyword.merge(opts)
        )
   end
 
@@ -125,6 +127,12 @@ defmodule Khafra.SearchTable.Operations do
 
   # PRIVATE FUNCTIONS
   ###################
+  defp schema_table_options(schema) do
+    if function_exported?(schema, :table_options, 0),
+      do: schema.table_options(),
+      else: []
+  end
+
   defp configured_agents() do
     :khafra_search
     |> Application.get_env(:distribution)

@@ -6,6 +6,7 @@ defmodule Khafra.MixProject do
       app: :khafra_search,
       version: "0.3.0",
       elixir: "~> 1.9",
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
@@ -14,11 +15,12 @@ defmodule Khafra.MixProject do
     ]
   end
 
-  def application do
-    [
-      extra_applications: [:logger], mod: {Khafra.Application, []}
-    ]
-  end
+  # `dev_support/` holds the bundled Ecto/`~SQL` examples that exercise the
+  # library locally. They are intentionally excluded from `:prod` (and from
+  # the published hex package) so consumers don't compile against
+  # `Application.compile_env(:khafra_search, :repo)` or pull in extra deps.
+  defp elixirc_paths(env) when env in [:dev, :test], do: ["lib", "dev_support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   defp deps do
     [
@@ -50,7 +52,7 @@ defmodule Khafra.MixProject do
     [
       licenses: ["MIT"],
       maintainers: ["Tyler Pierce"],
-      files: ["lib", "mix.exs", "README.md", "test", "config"],
+      files: ["lib", "mix.exs", "README.md", "config"],
       links: %{"GitHub" => "https://github.com/praxis-of-nines/khafra-search"},
       source_url: "https://github.com/praxis-of-nines/khafra-search"
     ]

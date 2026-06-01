@@ -37,7 +37,7 @@ defmodule Khafra.Serialize do
 
   def keys(%schema{} = entity) do
     entity
-    |> Map.take([:id, :updated_at | schema.index_fields()])
+    |> Map.take([:id, :updated_at | field_names(schema.index_fields())])
     |> Map.keys()
   end
 
@@ -50,7 +50,7 @@ defmodule Khafra.Serialize do
 
   def values(%schema{} = entity) do
     entity
-    |> Map.take([:id, :updated_at | schema.index_fields()])
+    |> Map.take([:id, :updated_at | field_names(schema.index_fields())])
     |> Enum.map(fn 
          {_, %DateTime{} = val} ->
            DateTime.to_unix(val, :microsecond)
@@ -74,15 +74,77 @@ defmodule Khafra.Serialize do
   end
 
   def search_table_schema(%schema{}) do
+    index_defs = schema.index_fields()
+    names = field_names(index_defs)
+    defs_map = column_defs_map(index_defs)
+
     :fields
     |> schema.__schema__()
-    |> Enum.map(fn f -> {f, ecto_to_manticore_type(schema.__schema__(:type, f))} end)
-    |> Enum.filter(fn {f, _t} -> f in [:id, :updated_at | schema.index_fields()] end)
+    |> Enum.map(fn f ->
+      {f, resolve_manticore_type(f, schema.__schema__(:type, f), defs_map)}
+    end)
+    |> Enum.filter(fn {f, _t} -> f in [:id, :updated_at | names] end)
   end
+
+  @doc """
+  Extract bare field names from a list of column definitions.
+  Normalizes `atom | {atom, role} | {atom, role, opts}` → `atom`.
+  """
+  def field_names(index_defs) do
+    Enum.map(index_defs, &field_name/1)
+  end
+
+  @doc "Extract the bare field name from a column definition."
+  def field_name(name) when is_atom(name), do: name
+  def field_name({name, _role}), do: name
+  def field_name({name, _role, _opts}), do: name
 
   # PRIVATE FUNCTIONS
   ###################
-  
+
+  # Build a map of field_name => {role, opts} for rich defs; bare atoms get nil.
+  defp column_defs_map(index_defs) do
+    Map.new(index_defs, fn
+      name when is_atom(name)    -> {name, nil}
+      {name, role}               -> {name, {role, []}}
+      {name, role, opts}         -> {name, {role, opts}}
+    end)
+  end
+
+  # Resolve the Manticore column type for a field, respecting explicit role/type overrides.
+  defp resolve_manticore_type(field, ecto_type, defs_map) do
+    case Map.get(defs_map, field) do
+      # Bare atom or field not in defs — auto-detect
+      nil ->
+        ecto_to_manticore_type(ecto_type)
+
+      {role, opts} ->
+        case Keyword.get(opts, :type) do
+          # Explicit type override
+          manticore_type when not is_nil(manticore_type) ->
+            maybe_stored(manticore_type, opts)
+
+          # No override — derive from role + ecto type
+          nil ->
+            auto = ecto_to_manticore_type(ecto_type)
+            apply_role(auto, role, opts)
+        end
+    end
+  end
+
+  # When the auto-detected type is :text, the role controls whether it stays
+  # :text (full-text field) or becomes :string (stored attribute).
+  defp apply_role(:text, :attribute, _opts), do: :string
+  defp apply_role(:text, :field, opts), do: maybe_stored(:text, opts)
+  defp apply_role(type, _role, _opts), do: type
+
+  # Append " stored" to text columns that opt into it.
+  defp maybe_stored(:text, opts) do
+    if Keyword.get(opts, :stored, false), do: :"text stored", else: :text
+  end
+
+  defp maybe_stored(type, _opts), do: type
+
   # Primary keys
   defp ecto_to_manticore_type(:id),             do: :uint
   defp ecto_to_manticore_type(:binary_id),      do: :string

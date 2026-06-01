@@ -21,5 +21,13 @@ defmodule Khafra.Sample.TestSchema do
   end
 
   @impl Khafra.SearchBehaviour
-  def index_fields, do: [:city, :desc]
+  def index_fields do
+    [
+      {:city, :field, stored: true},
+      {:desc, :field},
+      {:temp_lo, :attribute},
+      {:temp_hi, :attribute},
+      {:score, :attribute}
+    ]
+  end
 end

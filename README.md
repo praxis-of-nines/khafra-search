@@ -28,7 +28,6 @@ end
 def start(_type, _args) do
     import Supervisor.Spec
 
-    # List all child processes to be supervised
     children = [
       ...,
       Khafra.Supervisor
@@ -60,7 +59,7 @@ For modules using `Ecto.Schema`. The behaviour requires a single callback,
 for full-text search. The schema's `@source` (table name) is used to derive
 the Manticore table and its `_dist` distributed alias.
 
-```elixir path=lib/sample/test_schema.ex start=1
+```elixir path=dev_support/sample/test_schema.ex start=1
 defmodule Khafra.Sample.TestSchema do
   use Ecto.Schema
   import Ecto.Changeset
@@ -93,7 +92,7 @@ library instead of Ecto. Two callbacks are required:
   * `table_name/0` &mdash; the underlying SQL table name as an atom
   * `index_fields/0` &mdash; a `Keyword.t()` of `field: type` pairs to index
 
-```elixir path=lib/sample/test_sql.ex start=1
+```elixir path=dev_support/sample/test_sql.ex start=1
 defmodule Khafra.Sample.TestSql do
   @behaviour Khafra.SearchBehaviourSQL
 
@@ -107,9 +106,10 @@ end
 
 ## Search Examples
 
-The modules under `lib/sample/` show the basics for how Khafra is intended to be wired into
-an application. Two complete samples are included &mdash; one driven by Ecto
-(`Khafra.Sample`) and one driven by `~SQL` (`Khafra.Sample.SampleSQL`).
+The modules under `dev_support/sample/` show the basics for how Khafra is intended to
+be wired into an application. Two complete samples are included &mdash; one driven by
+Ecto (`Khafra.Sample`) and one driven by `~SQL` (`Khafra.Sample.SampleSQL`). They are
+compiled only in `:dev` and `:test` and are not shipped in the published package.
 
 ### Ecto example
 
@@ -117,7 +117,7 @@ an application. Two complete samples are included &mdash; one driven by Ecto
 operation and, when the schema implements `Khafra.SearchBehaviour`,
 transparently mirror the row into the Manticore real-time table.
 
-```elixir path=lib/sample/sample.ex start=11
+```elixir path=dev_support/sample/sample.ex start=11
 def add_city(%{} = attrs, opts) do
   %TestSchema{}
   |> TestSchema.changeset(attrs)
@@ -156,7 +156,7 @@ primary write. `Khafra.match/2` understands `%SQL{}` structs directly and
 translates `WHERE field = 'value'` predicates into Manticore `MATCH`
 expressions against the `_dist` table.
 
-```elixir path=lib/sample/sampl_sql.ex start=18
+```elixir path=dev_support/sample/sampl_sql.ex start=18
 def add_book(%{id: id, title: title, description: description}, _opts) do
   Enum.to_list(
     ~SQL"INSERT INTO book (id, title, description) VALUES ({{id}}, {{title}}, {{description}})"
