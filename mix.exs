@@ -4,7 +4,7 @@ defmodule Khafra.MixProject do
   def project do
     [
       app: :khafra_search,
-      version: "0.3.0",
+      version: "0.3.3",
       elixir: "~> 1.9",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,

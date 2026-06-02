@@ -110,5 +110,7 @@ defmodule Khafra.SearchTable.TableServer do
     }
   end
 
+  defp status_into_state({:error, _reason}, state), do: state
+
   defp no_reply(state), do: {:noreply, state}
 end

@@ -47,9 +47,13 @@ defmodule Khafra.SearchTable.TableObserver do
     end)
 
     tables =
-      Map.new(schemas ++ sql_modules, fn mod ->
-        {pid, _meta} = TableServer.lookup(mod)
-        {mod, pid}
+      schemas
+      |> Kernel.++(sql_modules)
+      |> Enum.reduce(%{}, fn mod, acc ->
+        case TableServer.lookup(mod) do
+          {pid, _meta} -> Map.put(acc, mod, pid)
+          :undefined -> acc
+        end
       end)
 
     {:noreply, %{state | tables: tables, schemas: schemas, sql_modules: sql_modules}}
